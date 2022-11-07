@@ -13,90 +13,97 @@ Lembre-se de seguir os passos:
 2-Programe a simulação no Wokwi
 3-Transfira seu projeto para o circuito físico (protoboard, esp32) utilizando a IDE do Arduino para programar o ESP.
 
-// #define LEDred 2
-// #define LEDgre 4 
-// #define LEDyel 5 
-// #define LEDpin 18
-// #define buzzer 19 
-//#define botao1 35
-// int estadoled = 0;
-int sensor = 1;
-int sensore = 0; 
-int min_sensor = 1; 
-int max_sensor = 4095; 
-int leitura = 0; 
+Resposta: 
+#define LEDred 2
+#define LEDgre 42
+#define LEDyel 40
+#define LEDwhite 0
+#define buzzer 19
+#define botao1 5
+#define botao2 6
+int sensor = 10;
+int posicao = -1;  // var auxíliar
 
+const int quantidade = 100;       // quantos binário eu quero salvar
+int numeros[quantidade * 4];      // cada binário com quatro dígitos
+int binario[4] = { 0, 0, 0, 0 };  // cada vez que rodar ele vai converter o valor para binários
+int cofre[quantidade];            // guarda a frequência dos números
+int frequencias[16] = { 10, 273, 546, 819, 1092, 1363, 1638, 1911, 2184, 2457, 2730, 3003, 3276, 3539, 3822, 4049 };
+int valoresSalvos[200];
 
-void setup() {
- // pinMode(LEDred, OUTPUT);
- // pinMode(LEDgre, OUTPUT);
- // pinMode(LEDyel, OUTPUT);
- // pinMode(LEDpin, OUTPUT);
- // pinMode(buzzer, OUTPUT); 
- // pinMode(botao1, INPUT_PULLUP); 
-  pinMode(sensor, INPUT);
+void addlista(int decimal) {  // alterar o valor de uma variavél, função void nao retorna nada
+  if (posicao + 1 >= 200) {
+    Serial.println("ERRO: limite de valores atingido");
+  } else {
+    valoresSalvos[posicao + 1] = decimal;
+    posicao++;
+  }
+}
+int conversorValue(int valor) {  // dividir o 4095
 
-  Serial.begin(115200);
+  return valor / 273;
 }
 
+void convertebinarios(int valor) {
+
+  for (int i = 3; i >= 0; i--) {
+    binario[i] = valor % 2;
+    valor = valor / 2;
+  }
+}
+
+void acendeEToca(int decimal) {
+  convertebinarios(decimal);
+  digitalWrite(LEDred, binario[0]); // convertendo pde decimal para binário, acendendo e tocando conforme os valores de 1 e 0 
+
+  digitalWrite(LEDgre, binario[1]);
+
+  digitalWrite(LEDyel, binario[2]);
+
+  digitalWrite(LEDwhite, binario[3]);
+  tone(buzzer, frequencias[decimal]); 
+  delay(500);
+  tone(buzzer, 0);
+  digitalWrite(LEDred, LOW);
+  digitalWrite(LEDgre, LOW);
+  digitalWrite(LEDyel, LOW);
+  digitalWrite(LEDwhite, LOW);
+}
+
+void tocaTudo() {  // reproduz o que foi feito no primeiro botão 
+  for (int i = 0; i <= posicao; i++) {
+    acendeEToca(valoresSalvos[i]);
+    delay(300);
+  }
+  posicao = -1;
+}
+
+void setup() {
+  pinMode(LEDred, OUTPUT);
+  pinMode(LEDgre, OUTPUT);
+  pinMode(LEDyel, OUTPUT);
+  pinMode(LEDwhite, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  pinMode(sensor, INPUT);
+  pinMode(botao1, INPUT);
+  pinMode(botao2, INPUT);
+}
+
+int lastState = LOW;
+int playState = LOW;
 void loop() {
-  // digitalWrite(LEDred, HIGH);
-  // tone(buzzer,293);  
-  // delay(100); 
-  // noTone(buzzer); 
+  if (digitalRead(botao1) == HIGH && lastState == LOW) {
+    addlista(conversorValue(analogRead(sensor)));
+    acendeEToca(conversorValue(analogRead(sensor)));
+    lastState = HIGH;
+  } else if (digitalRead(botao1) == LOW && lastState == HIGH) {
+    lastState = LOW;
+  }
 
-  // digitalWrite(LEDred, LOW);
-  // delay(100);  
-
-  // digitalWrite(LEDgre, HIGH);
-  // tone(buzzer,415);  
-  // delay(100); 
-  // noTone(buzzer); 
-
-  // digitalWrite(LEDgre, LOW);
-  // delay(100);
-
-  // digitalWrite(LEDyel, HIGH);
-  // tone(buzzer,622);  
-  // delay(100); 
-  // noTone(buzzer);   
-  
-  // digitalWrite(LEDyel, LOW);
-  // delay(100);
-
-  // digitalWrite(LEDpin, HIGH);
-  // tone(buzzer,830);  
-  // delay(100); 
-  // noTone(buzzer); 
-
-  // digitalWrite(LEDpin, LOW);
-  // delay(100);
-
-  sensore = analogRead(sensor);
-  // print the sensor reading so you know its range
-  Serial.println("ihuuuu:");
-  Serial.println(sensore);
-  // map the sensor reading to a range for the LED
-  // analogWrite(sensor, map(sensor, 0, 1023, 0, 255));
-  delay(100);
-
-  // Serial.print("botao1");
-  // if (digitalRead(botao1) == LOW) // Se o botão for pressionado
-  // {
-  //  estadoled = !estadoled; // troca o estado do LED
-  // digitalWrite(estadoled);
-  // while (digitalRead(botao1) == LOW);
-  //  delay(100);
-  // }
-  // if(digitalRead(botao1) == LOW){
-  //   delay(500);
-  // digitalWrite(); } 
-} 
-void convertebinarios() { 
-
-  map(leitura, min_sensor, max_sensor, 0, 15); 
-
-  if(leitura == 1){
-     analogWrite(Serial("0001"));
+  if (digitalRead(botao2) == HIGH && playState == LOW) { 
+    tocaTudo();
+    playState = HIGH;
+  } else if (digitalRead(botao2) == LOW && playState == HIGH) {
+    playState = LOW;
   }
 }
