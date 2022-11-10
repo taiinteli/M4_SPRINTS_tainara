@@ -203,48 +203,44 @@ Ele vai armazenando estas distancias em um vetor fornecido como parâmetro e ret
 Esta função deve ir lendo os 4 sensores até que um comando de pare seja enviado.
 Para simular os sensores e os comandos de pare, use as funções já construídas nos ítens anteriores e em um looping contínuo até que um pedido de parada seja enviado pelo usuário.
 A função final deve utilizar as funções declaradas acima para ler os sensores e o movimento do robô e no final percorrer o vetor e mostrar o movimento a cada direção na maior distância a cada movimento.
-*/
-// Esse exerício eu não conseguir terminar, mas o começo do meu racíonio foi esse: 
-#include <iostream>
-#include <string>
-using namespace std;
+*/ 
 
-int controle(int vetor[]){
-  // matriz bidimensional, guarda posição e distância 
-
-  struct trajeto { 
-    string direcoes[4]; 
-    string distancia[4];
-    };
-  int vetorDis[4] = {}; 
-  for (int i = 0; i <= 3; i++){ 
-    
-    if (vetor[i] > vetorDis[0]){
-      vetorDis[0] = vetor[i]; 
-    }
-    
-  }
-  return vetorDis[0]; 
-}
-int main(){
-
-  int lugares[4] = {0, 20, 100, 50};
-
-  cout << controle(lugares); 
-}
-// exemplo de função que substituia a "sort" na linguagem c++
-int n = 4 
-  i
-for(int i=0;i<n;i++)
-	{		
-		for(j=i+1;j<n;j++)
-		{
-			if(arr[i]>arr[j])
-			{
-				temp  =arr[i];
-				arr[i]=arr[j];
-				arr[j]=temp;
-			}
-		}
+int maxVetor = maxv;
+	int *vetorMov = v;
+	int posAtualVetor = 0;
+	int dirigindo = 1;		
+	while(dirigindo){		
+		int medida = leituraSensor();
+		medida = converteSensor(medida,0,830);
+		posAtualVetor = armazenaValor(vetorMov,maxVetor,posAtualVetor,medida);
+		dirigindo = leComando();		
 	}
+	return posAtualVetor;
+}
+
+
+// O trecho abaixo irá utilizar as funções acima para ler os sensores e o movimento
+// do robô e no final percorrer o vetor e mostrar o movimento a cada direção baseado 
+// na maior distância a cada movimento
+
+void percorre(int *v,int tamPercorrido){	
+
+	int *vetorMov = v;
+	int maiorDir = 0;
+
+for(int i = 0; i< tamPercorrido; i+=4){
+		char *direcao = direcaoMenorCaminho(&(vetorMov[i]),&maiorDir);
+		printf("Movimentando para %s distancia = %i\n",direcao,maiorDir);
+	}
+}
+
+int main(int argc, char** argv) {
+	int maxVetor = 100;
+	int vetorMov[maxVetor*4];
+	int posAtualVet = 0;
+	
+	posAtualVet = dirige(vetorMov,maxVetor);
+	percorre(vetorMov,posAtualVet);
+	
+	return 0;
 }
